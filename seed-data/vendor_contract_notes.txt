@@ -1,0 +1,43 @@
+VENDOR CONTRACT REVIEW - CloudSync Analytics
+Date reviewed: 2024-12-20
+Reviewed by: Legal (Catherine Park)
+
+Vendor Details:
+- Company: CloudSync Analytics Inc.
+- EIN: 83-5127946
+- Primary contact: Daniel Morrison, CEO
+  Email: d.morrison@cloudsync.io
+  Phone: (650) 555-0234
+  Mobile: (650) 555-0289
+
+Contract Terms:
+- 24-month agreement, auto-renewal
+- Monthly fee: $12,500
+- Payment via ACH to routing #021000021, account #7743892156
+- Signed by Daniel Morrison (CloudSync) and Lisa Chen (our side)
+
+Billing Contact at CloudSync:
+- Maria Gonzalez, accounts@cloudsync.io
+- Direct line: (650) 555-0301
+- For wire transfers, reference PO-2024-8834
+
+Data Processing Addendum Notes:
+- CloudSync stores data in us-east-1 (AWS)
+- They have access to our anonymized usage data only
+- Sub-processors listed: Snowflake, Datadog, SendGrid
+- DPA signed on 12/18 by Catherine Park
+- Catherine's bar number: CA-298451
+
+Insurance Requirements:
+- CloudSync carries $5M E&O policy (policy #PLX-2024-891234)
+- Certificate of insurance on file, expires 06/30/2025
+- Our policy reference: HRT-2024-445567
+
+Security Review:
+- SOC 2 Type II report reviewed (report period: 01/2024 - 06/2024)
+- Penetration test results from HackerOne shared under NDA
+- API key for integration: cs_prod_4a8b2c1d9e7f3a5b6c8d0e2f4a6b8c0d
+- Webhook secret: whsec_9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c
+
+Notes:
+Daniel mentioned they're raising Series B. Potential pricing changes after Q2 2025. We should lock in current rate. His assistant Jessica handles scheduling: j.wells@cloudsync.io, (650) 555-0178.

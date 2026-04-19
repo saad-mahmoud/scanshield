@@ -1,0 +1,31 @@
+EMPLOYEE ONBOARDING CHECKLIST - Q1 2025
+
+New hire: Sarah Mitchell
+Start date: January 15, 2025
+Department: Engineering
+Manager: David Park
+
+HR Notes:
+- SSN verified: 419-55-7231
+- Direct deposit set up for account ending in 8834
+- Emergency contact: Michael Mitchell, (512) 555-0147
+- Personal email for benefits enrollment: sarah.mitchell.92@gmail.com
+- Home address: 2847 Oakwood Drive, Apt 12B, Austin, TX 78745
+
+IT Setup:
+- Laptop: MacBook Pro 16" M3 (Asset #LP-2025-0891)
+- Corporate email created: s.mitchell@acmecorp.com
+- Badge access: Building A, floors 2-4
+- VPN credentials issued on 01/15
+
+Payroll:
+- Annual salary: $145,000
+- First paycheck: January 31, 2025
+- Tax withholding: Single, 0 allowances
+
+Notes from orientation:
+Sarah mentioned she previously worked at Datadog for 3 years. She holds AWS Solutions Architect certification. Her personal phone is (512) 555-0193 in case we need to reach her before corporate phone arrives.
+
+Insurance enrollment deadline: February 14, 2025
+Selected plan: Blue Cross PPO Family
+Dependents: Michael Mitchell (spouse), DOB 03/22/1990

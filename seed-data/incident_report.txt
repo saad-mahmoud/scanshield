@@ -1,0 +1,48 @@
+SECURITY INCIDENT REPORT #IR-2025-003
+Classification: Medium
+Date detected: 2025-01-28 14:22 UTC
+Date resolved: 2025-01-28 18:45 UTC
+Reported by: Alex Kim, Security Engineer (a.kim@acmecorp.com)
+
+SUMMARY:
+A misconfigured S3 bucket (s3://acme-client-exports-prod) was publicly accessible for approximately 6 hours between 08:00 and 14:22 UTC on January 28. The bucket contained CSV exports with client data.
+
+AFFECTED DATA:
+The following export files were in the bucket:
+- meridian_health_employees_jan2025.csv (2,341 records)
+- novatech_scan_results_dec2024.csv (891 records)
+- truenorth_risk_assessment.csv (156 records)
+
+Sample of exposed data fields per record:
+- Full name, email address, job title
+- IP addresses from network scans
+- In the Meridian file: SSNs were included by mistake (e.g., 419-55-7231, 528-44-7193, 331-82-6654, 672-41-8903)
+- In the NovaTech file: internal hostnames and MAC addresses (e.g., 00:1A:2B:3C:4D:5E, 00:1A:2B:3C:4D:6F)
+
+ROOT CAUSE:
+During deployment of the new export feature (PR #1247, merged by David Park), the bucket policy was overwritten with a public-read ACL. The Terraform state file had a conflict that wasn't caught in code review.
+
+RESPONSE ACTIONS:
+1. 14:22 - Alex Kim detected the exposure via automated CloudTrail alert
+2. 14:25 - Bucket access revoked by Alex (AWS access key: AKIAIOSFODNN7EXAMPLE)
+3. 14:30 - Incident channel opened in Slack (#incident-2025-003)
+4. 15:00 - David Park confirmed the root cause in the Terraform config
+5. 16:00 - Legal notified (Catherine Park, ext. 4421, c.park@acmecorp.com)
+6. 17:00 - Client notification emails drafted
+7. 18:45 - All clients notified, bucket audit complete
+
+IMPACTED CLIENTS:
+- Meridian Health Group: James Whitfield notified at j.whitfield@meridianhealth.org, (404) 555-0288
+- NovaTech: Robert Chen notified at r.chen@novatech.com, (415) 555-0822
+- TrueNorth Insurance: Patricia Nguyen notified at p.nguyen@truenorth.com, (312) 555-0933
+
+POST-MORTEM SCHEDULED: February 3, 2025, 10:00 AM CST
+Lead: David Park
+Zoom link: https://zoom.us/j/98765432100?pwd=a1b2c3d4e5
+Passcode: 8834
+
+FOLLOW-UP:
+- Enable S3 Block Public Access at the account level (assigned to Alex Kim)
+- Add Terraform plan review step to CI pipeline (assigned to Sarah Mitchell)
+- Rotate all AWS access keys used during response (AKIAIOSFODNN7EXAMPLE already rotated)
+- File updated with SOC 2 auditor (Bill Frederickson, b.frederickson@kpmg.com)

@@ -1,0 +1,34 @@
+Q4 2024 BUSINESS REVIEW - MEETING NOTES
+Date: January 8, 2025
+Location: Conference Room B / Zoom
+Attendees: Lisa Chen (CEO), Mark Thompson (CFO), David Park (VP Eng), Anna Kowalski (VP Sales)
+
+FINANCIALS (Mark):
+- Q4 revenue: $4.2M (up 18% QoQ)
+- Biggest deal closed: Meridian Health Group, $380K ARR. POC signed by James Whitfield, their IT Director.
+- Outstanding receivables: $127K from NovaTech (contact: Robert Chen, r.chen@novatech.com, (415) 555-0822)
+- Corporate card ending in 8891 was compromised in December, replacement issued. Old card: 4532-8891-2244-5567, new card ending in 3302.
+
+ENGINEERING (David):
+- Shipped v3.2 with PII detection engine
+- Performance: scanning 10K documents in under 3 minutes
+- New hires starting in January: Sarah Mitchell (senior eng) and Jake Torres (QA)
+- Jake's personal email for onboarding: jake.torres.dev@outlook.com, phone (737) 555-0412
+- AWS bill optimization saved $14K/month by moving to reserved instances
+- Production database credentials rotated on 12/15. New root password stored in Vault.
+
+SALES (Anna):
+- Pipeline for Q1: $6.8M
+- Key prospects:
+  * TrueNorth Insurance - contact: Patricia Nguyen, p.nguyen@truenorth.com, (312) 555-0933
+  * Greenfield Capital - contact: Ahmed Hassan, ahmed.h@greenfieldcap.com, (212) 555-0571
+  * Lone Star Medical - contact: Dr. Maria Santos, m.santos@lonestarmed.org, SSN on file for background check: 528-44-7193
+- Anna's new company phone: (512) 555-0845
+
+ACTION ITEMS:
+1. Mark to send W-9 (EIN: 47-3829156) to Meridian Health by Jan 15
+2. David to finalize SOC 2 documentation - auditor contact: Bill Frederickson, b.frederickson@kpmg.com
+3. Lisa to sign updated NDA with Greenfield Capital
+
+NEXT MEETING: February 12, 2025, 2:00 PM CST
+Dial-in: (800) 555-0100, passcode: 7742#

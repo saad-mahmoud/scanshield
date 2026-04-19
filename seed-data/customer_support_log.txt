@@ -1,0 +1,38 @@
+SUPPORT TICKET #4871 - Account Access Issue
+Created: 2025-02-03 09:14 EST
+Status: Resolved
+Agent: Karen Liu
+
+Customer: James Whitfield
+Account ID: ACC-2025-44821
+Email: j.whitfield@meridianhealth.org
+Phone: (404) 555-0288
+
+Summary:
+Customer called at 9:14 AM unable to log into the portal. Verified identity using last 4 of SSN (7842) and date of birth (07/14/1985). Customer confirmed billing address at 1523 Peachtree St NE, Suite 400, Atlanta, GA 30309.
+
+The account was locked after 5 failed login attempts. Customer mentioned he recently changed his password to include special characters and may have been entering the old one. Reset link sent to j.whitfield@meridianhealth.org.
+
+Customer also requested we update his phone number on file from (404) 555-0288 to (770) 555-0341. He mentioned his wife, Rebecca Whitfield, should also have access to the account. Her email is r.whitfield@gmail.com and her SSN ends in 3156.
+
+Follow-up: Customer called back at 2:45 PM to confirm access restored. He also asked about API access for their internal dashboard. Issued API key: mk_live_7f8a9b2c3d4e5f6a7b8c9d0e1f2a3b4c. Reminded customer to store it securely.
+
+Resolution: Password reset + phone number update + secondary user access granted + API key issued.
+
+---
+
+SUPPORT TICKET #4872 - Billing Dispute
+Created: 2025-02-03 10:02 EST
+Status: Pending
+Agent: Tom Reeves
+
+Customer: Priya Sharma
+Account ID: ACC-2025-33107
+Email: priya.sharma@techvault.io
+Phone: (628) 555-0194
+
+Customer is disputing charge of $2,499.00 on credit card ending in 4421 (Visa, exp 08/27). Says she canceled the annual plan on January 15 but was still charged on February 1.
+
+Checked billing system: cancellation request was submitted but not processed due to a backend error. Refund initiated to card ending 4421. Customer's billing address: 88 First Street, Unit 7, San Francisco, CA 94105.
+
+Customer also mentioned that her company's tax ID is 82-4917356 and needs an updated W-9 for their records. She provided her personal cell (628) 555-0167 for the callback about the refund confirmation.

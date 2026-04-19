@@ -1,0 +1,66 @@
+TECHNICAL SPECIFICATION: Notification Service v2
+Author: Engineering Team
+Last updated: 2025-01-20
+
+1. OVERVIEW
+
+The notification service handles delivery of system alerts to users via email, Slack, and in-app channels. This document covers the v2 rewrite, which replaces the legacy polling-based system with an event-driven architecture.
+
+2. ARCHITECTURE
+
+Events are published to a Redis stream by the API layer. The notification service consumes from this stream, applies routing rules, and dispatches to the appropriate channel.
+
+Components:
+- Event Publisher (NestJS module in the API)
+- Event Consumer (standalone NestJS microservice)
+- Template Engine (Handlebars-based, templates stored in PostgreSQL)
+- Delivery Workers (one per channel: email via SendGrid, Slack via webhook, in-app via WebSocket)
+
+3. EVENT SCHEMA
+
+{
+  "eventId": "uuid",
+  "type": "scan_completed | finding_critical | report_ready | user_invited",
+  "payload": {
+    "organizationId": "uuid",
+    "triggeredBy": "system | user",
+    "metadata": {}
+  },
+  "timestamp": "ISO 8601"
+}
+
+4. ROUTING RULES
+
+Each organization can configure notification preferences:
+- Which event types trigger notifications
+- Which channels to use per event type
+- Quiet hours (suppress non-critical notifications)
+- Escalation: if a critical finding is not acknowledged within 30 minutes, re-notify via all channels
+
+5. DELIVERY GUARANTEES
+
+- At-least-once delivery
+- Failed deliveries retry 3 times with exponential backoff (1s, 5s, 25s)
+- Dead letter queue for messages that fail all retries
+- Delivery receipts stored for audit trail
+
+6. DATABASE CHANGES
+
+New tables:
+- notification_preferences (org_id, event_type, channels[], quiet_hours_start, quiet_hours_end)
+- notification_log (id, event_id, channel, status, delivered_at, error_message, retry_count)
+
+7. PERFORMANCE TARGETS
+
+- Process 1000 events/minute sustained
+- Email delivery within 30 seconds of event
+- Slack delivery within 5 seconds of event
+- In-app delivery within 1 second of event
+
+8. MIGRATION PLAN
+
+Phase 1: Deploy consumer alongside legacy system (shadow mode)
+Phase 2: Route 10% of traffic to new system
+Phase 3: Full cutover, decommission legacy poller
+
+Rollback: Feature flag "notification_v2_enabled" controls routing. Set to false to revert.
