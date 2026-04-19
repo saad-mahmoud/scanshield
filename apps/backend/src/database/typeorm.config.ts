@@ -1,25 +1,15 @@
+import { join } from 'node:path';
 import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { getDatabaseUrl } from './database-url';
 
 export function createTypeOrmOptions(): TypeOrmModuleOptions {
-  const synchronize = process.env.NODE_ENV === 'development';
-
-  if (process.env.DATABASE_URL) {
-    return {
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      autoLoadEntities: true,
-      synchronize,
-    };
-  }
-
+  const migrations = [join(__dirname, 'migrations', '*.{js,ts}')];
   return {
     type: 'postgres',
-    host: process.env.DATABASE_HOST ?? 'localhost',
-    port: Number(process.env.DATABASE_PORT ?? 5432),
-    username: process.env.DATABASE_USER ?? 'postgres',
-    password: process.env.DATABASE_PASSWORD ?? 'postgres',
-    database: process.env.DATABASE_NAME ?? 'scanshield',
+    url: getDatabaseUrl(),
     autoLoadEntities: true,
-    synchronize,
+    synchronize: false,
+    migrations,
+    migrationsRun: true,
   };
 }

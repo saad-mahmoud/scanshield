@@ -4,43 +4,33 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { Repository } from 'typeorm';
-import { ApiKey } from '../entities/api-key.entity';
-import { hashApiKey } from './api-key.util';
+import { User } from '../entities/user.entity';
+import { resolveJwtUser } from './resolve-jwt-user';
 
 @Injectable()
-export class ApiKeyAuthGuard implements CanActivate {
+export class JwtAuthGuard implements CanActivate {
   constructor(
-    @InjectRepository(ApiKey)
-    private readonly apiKeys: Repository<ApiKey>,
+    private readonly jwt: JwtService,
+    @InjectRepository(User)
+    private readonly users: Repository<User>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const authHeader = request.headers.authorization;
-
     if (!authHeader?.startsWith('Bearer ')) {
       throw new UnauthorizedException('Missing or invalid Authorization header');
     }
-
     const token = authHeader.slice('Bearer '.length).trim();
     if (!token) {
-      throw new UnauthorizedException('Missing API key');
+      throw new UnauthorizedException('Missing token');
     }
 
-    const keyHash = hashApiKey(token);
-    const record = await this.apiKeys.findOne({
-      where: { keyHash },
-      relations: ['user'],
-    });
-
-    if (!record?.user) {
-      throw new UnauthorizedException('Invalid API key');
-    }
-
-    request.user = record.user;
+    request.user = await resolveJwtUser(this.jwt, this.users, token);
     return true;
   }
 }

@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { RiskLevel } from './risk-level.enum';
 import { User } from './user.entity';
 import { WorkflowStatus } from './workflow-status.enum';
 
@@ -30,6 +31,14 @@ export class Document {
     enumName: 'workflow_status_enum',
   })
   status: WorkflowStatus;
+
+  @Column({
+    type: 'enum',
+    enum: RiskLevel,
+    enumName: 'risk_level_enum',
+    default: RiskLevel.Clean,
+  })
+  riskLevel: RiskLevel;
 
   @CreateDateColumn()
   createdAt: Date;

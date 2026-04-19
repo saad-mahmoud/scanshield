@@ -7,7 +7,7 @@ import { Document } from '../entities/document.entity';
 import { Finding } from '../entities/finding.entity';
 import { WorkflowStatus } from '../entities/workflow-status.enum';
 import { DOCUMENT_QUEUE } from '../queue/queue.constants';
-import { scanContent } from './scan-patterns';
+import { computeRiskLevel, scanContent } from './scan-patterns';
 
 @Processor(DOCUMENT_QUEUE)
 @Injectable()
@@ -42,6 +42,7 @@ export class DocumentScanProcessor extends WorkerHost {
           .execute();
 
         const matches = scanContent(doc.content);
+        const riskLevel = computeRiskLevel(matches);
 
         for (const m of matches) {
           await manager.save(
@@ -55,7 +56,11 @@ export class DocumentScanProcessor extends WorkerHost {
           );
         }
 
-        await manager.update(Document, { id: documentId }, { status: WorkflowStatus.Done });
+        await manager.update(
+          Document,
+          { id: documentId },
+          { status: WorkflowStatus.Completed, riskLevel },
+        );
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

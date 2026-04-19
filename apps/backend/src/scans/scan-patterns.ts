@@ -1,4 +1,5 @@
 import { FindingType } from '../entities/finding-type.enum';
+import { RiskLevel } from '../entities/risk-level.enum';
 
 export interface ScanMatch {
   type: FindingType;
@@ -41,4 +42,25 @@ export function scanContent(content: string): ScanMatch[] {
   }
 
   return matches.sort((a, b) => a.position - b.position);
+}
+
+export function computeRiskLevel(matches: ScanMatch[]): RiskLevel {
+  if (matches.length === 0) {
+    return RiskLevel.Clean;
+  }
+
+  const types = new Set(matches.map((m) => m.type));
+  if (types.has(FindingType.Ssn) || types.has(FindingType.CreditCard)) {
+    return RiskLevel.Critical;
+  }
+  if (types.size >= 2) {
+    return RiskLevel.High;
+  }
+
+  const only = matches[0].type;
+  if (only === FindingType.Email || only === FindingType.Phone) {
+    return RiskLevel.Medium;
+  }
+
+  return RiskLevel.Medium;
 }

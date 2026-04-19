@@ -1,6 +1,7 @@
 export enum WorkflowStatus {
   Queued = 'queued',
   Processing = 'processing',
-  Done = 'done',
+  /** Matches task wording (“completed”) */
+  Completed = 'completed',
   Failed = 'failed',
 }
