@@ -1,5 +1,9 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+
+/** In Docker, the dev server must proxy to the backend *service* (backend:3000), not localhost. */
+const proxyTarget =
+  process.env.VITE_PROXY_TARGET ?? 'http://127.0.0.1:3000';
 
 export default defineConfig({
   plugins: [react()],
@@ -7,8 +11,9 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      '/api': { target: 'http://localhost:3000', changeOrigin: true },
-      '/auth': { target: 'http://localhost:3000', changeOrigin: true },
+      '/api': { target: proxyTarget, changeOrigin: true },
+      '/auth': { target: proxyTarget, changeOrigin: true },
+      '/admin': { target: proxyTarget, changeOrigin: true },
     },
   },
 });

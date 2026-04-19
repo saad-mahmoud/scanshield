@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../api';
+import { register } from '../api';
 import { useAuth } from '../auth-context';
 
-export function LoginPage() {
+export function RegisterPage() {
   const { setToken } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -17,11 +17,11 @@ export function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken } = await login(email, password);
+      const { accessToken } = await register(email, password);
       setToken(accessToken);
       navigate('/documents', { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -29,18 +29,18 @@ export function LoginPage() {
 
   return (
     <div style={{ maxWidth: 360, margin: '48px auto', padding: 16 }}>
-      <h1>Log in</h1>
+      <h1>Register</h1>
       <p style={{ color: '#555', fontSize: 14 }}>
-        Sign in with your email and password. The UI uses a JWT session; after login, use the API keys page in the nav to create keys for scripts and automation.
+        Create an account. Password must be at least 8 characters.
       </p>
       <form onSubmit={onSubmit}>
         <div style={{ marginBottom: 12 }}>
-          <label htmlFor="email">Email</label>
+          <label htmlFor="reg-email">Email</label>
           <br />
           <input
-            id="email"
+            id="reg-email"
             type="email"
-            autoComplete="username"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -48,15 +48,16 @@ export function LoginPage() {
           />
         </div>
         <div style={{ marginBottom: 12 }}>
-          <label htmlFor="password">Password</label>
+          <label htmlFor="reg-password">Password</label>
           <br />
           <input
-            id="password"
+            id="reg-password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={8}
             style={{ width: '100%', boxSizing: 'border-box' }}
           />
         </div>
@@ -66,11 +67,11 @@ export function LoginPage() {
           </p>
         ) : null}
         <button type="submit" disabled={loading}>
-          {loading ? 'Signing in…' : 'Sign in'}
+          {loading ? 'Creating account…' : 'Create account'}
         </button>
       </form>
       <p style={{ marginTop: 16, fontSize: 14 }}>
-        No account? <Link to="/register">Register</Link>
+        Already have an account? <Link to="/login">Log in</Link>
       </p>
     </div>
   );

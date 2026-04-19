@@ -1,38 +1,36 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  createDocument,
-  listDocuments,
-  type DocumentSummary,
-} from '../api';
+import { Link, useNavigate } from 'react-router-dom';
+import { createScan, listScans, type ScanSummary } from '../api';
 import { useAuth } from '../auth-context';
+import { riskLevelColor } from '../riskLevelColor';
 
 export function DocumentsPage() {
   const { token, logout } = useAuth();
-  const [items, setItems] = useState<DocumentSummary[]>([]);
+  const navigate = useNavigate();
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [scans, setScans] = useState<ScanSummary[]>([]);
+  const [listLoading, setListLoading] = useState(true);
 
-  const load = useCallback(async () => {
+  const loadScans = useCallback(async () => {
     if (!token) return;
-    setLoading(true);
+    setListLoading(true);
     setError(null);
     try {
-      const rows = await listDocuments(token);
-      setItems(rows);
+      const rows = await listScans(token);
+      setScans(rows);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load documents');
+      setError(err instanceof Error ? err.message : 'Failed to load scans');
     } finally {
-      setLoading(false);
+      setListLoading(false);
     }
   }, [token]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void loadScans();
+  }, [loadScans]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -45,11 +43,12 @@ export function DocumentsPage() {
     setUploading(true);
     setError(null);
     try {
-      const name =
+      const document_name =
         text.split('\n')[0]!.slice(0, 120) || `Scan ${new Date().toISOString()}`;
-      await createDocument(token, { name, content: text });
+      const { id } = await createScan(token, { document_name, content: text });
       setContent('');
-      await load();
+      void loadScans();
+      navigate(`/documents/${id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
@@ -58,66 +57,108 @@ export function DocumentsPage() {
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '24px auto', padding: 16 }}>
+    <div style={{ maxWidth: 900, margin: '24px auto', padding: 16 }}>
       <header
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: 24,
+          flexWrap: 'wrap',
+          gap: 12,
         }}
       >
         <h1 style={{ margin: 0 }}>Documents</h1>
-        <button type="button" onClick={logout}>
-          Log out
-        </button>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <Link to="/api-keys">API keys</Link>
+          <a href="/admin/queues" target="_blank" rel="noreferrer">
+            Queue (Bull Board)
+          </a>
+          <button type="button" onClick={logout}>
+            Log out
+          </button>
+        </div>
       </header>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>New scan</h2>
+      <section>
+        <h2 style={{ marginTop: 0, fontSize: 18 }}>Upload text</h2>
         <form onSubmit={onSubmit}>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={10}
-            placeholder="Paste text to scan for sensitive data…"
+            placeholder="Paste plain text to scan for PII…"
             style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
           />
           <div style={{ marginTop: 8 }}>
             <button type="submit" disabled={uploading}>
-              {uploading ? 'Submitting…' : 'Submit scan'}
+              {uploading ? 'Submitting…' : 'Upload and scan'}
             </button>
           </div>
         </form>
-      </section>
-
-      <section>
-        <h2>Your documents</h2>
         {error ? (
-          <p style={{ color: 'crimson' }} role="alert">
+          <p style={{ color: 'crimson', marginTop: 16 }} role="alert">
             {error}
           </p>
         ) : null}
-        {loading ? <p>Loading…</p> : null}
-        {!loading && items.length === 0 ? <p>No documents yet.</p> : null}
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {items.map((d) => (
-            <li
-              key={d.id}
-              style={{
-                borderBottom: '1px solid #ddd',
-                padding: '8px 0',
-              }}
-            >
-              <Link to={`/documents/${d.id}`}>{d.name}</Link>
-              {' — '}
-              <span>{d.status}</span>
-              <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>
-                {new Date(d.createdAt).toLocaleString()}
-              </span>
-            </li>
-          ))}
-        </ul>
+      </section>
+
+      <section style={{ marginTop: 40 }}>
+        <h2 style={{ marginTop: 0, fontSize: 18 }}>Your documents</h2>
+        {listLoading ? (
+          <p style={{ color: '#666', fontSize: 14 }}>Loading…</p>
+        ) : scans.length === 0 ? (
+          <p style={{ color: '#666', fontSize: 14 }}>No documents yet.</p>
+        ) : (
+          <table
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: 14,
+            }}
+          >
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '8px 0' }}>
+                  Name
+                </th>
+                <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '8px 0' }}>
+                  Status
+                </th>
+                <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '8px 0' }}>
+                  Findings
+                </th>
+                <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '8px 0' }}>
+                  Risk
+                </th>
+                <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '8px 0' }}>
+                  Uploaded
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {scans.map((s) => (
+                <tr key={s.id}>
+                  <td style={{ padding: '8px 0', verticalAlign: 'top' }}>
+                    <Link to={`/documents/${s.id}`}>{s.name}</Link>
+                  </td>
+                  <td style={{ padding: '8px 0', verticalAlign: 'top' }}>{s.status}</td>
+                  <td style={{ padding: '8px 0', verticalAlign: 'top' }}>
+                    {s.status === 'completed' ? s.findingsCount : '—'}
+                  </td>
+                  <td style={{ padding: '8px 0', verticalAlign: 'top' }}>
+                    <span style={{ fontWeight: 600, color: riskLevelColor(s.riskLevel) }}>
+                      {s.status === 'queued' || s.status === 'processing' ? '—' : s.riskLevel}
+                    </span>
+                  </td>
+                  <td style={{ padding: '8px 0', verticalAlign: 'top', color: '#555' }}>
+                    {new Date(s.createdAt).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
     </div>
   );

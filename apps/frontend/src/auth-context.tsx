@@ -2,12 +2,11 @@ import {
   createContext,
   useCallback,
   useContext,
-  useMemo,
   useState,
   type ReactNode,
 } from 'react';
 
-const STORAGE_KEY = 'scanshield_api_key';
+const STORAGE_KEY = 'scanshield_access_token';
 
 type AuthContextValue = {
   token: string | null;
@@ -33,12 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => setToken(null), [setToken]);
 
-  const value = useMemo(
-    () => ({ token, setToken, logout }),
-    [token, setToken, logout],
+  return (
+    <AuthContext.Provider value={{ token, setToken, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {

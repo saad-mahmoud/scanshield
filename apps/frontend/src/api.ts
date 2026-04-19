@@ -1,5 +1,11 @@
 const baseUrl = import.meta.env.VITE_API_URL ?? '';
 
+function errorFromBody(data: unknown, fallback: string): string {
+  return typeof (data as { message?: unknown })?.message === 'string'
+    ? (data as { message: string }).message
+    : fallback;
+}
+
 function headers(token: string, init?: HeadersInit): HeadersInit {
   return {
     'Content-Type': 'application/json',
@@ -8,46 +14,98 @@ function headers(token: string, init?: HeadersInit): HeadersInit {
   };
 }
 
-export async function createApiKey(
+export async function register(
   email: string,
   password: string,
-): Promise<{ apiKey: string }> {
-  const res = await fetch(`${baseUrl}/auth/api-keys`, {
+): Promise<{ accessToken: string }> {
+  const res = await fetch(`${baseUrl}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(typeof data.message === 'string' ? data.message : res.statusText);
+    throw new Error(errorFromBody(data, res.statusText));
   }
-  return data as { apiKey: string };
+  return data as { accessToken: string };
 }
 
-export type DocumentSummary = {
+export async function login(
+  email: string,
+  password: string,
+): Promise<{ accessToken: string }> {
+  const res = await fetch(`${baseUrl}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(errorFromBody(data, res.statusText));
+  }
+  return data as { accessToken: string };
+}
+
+export type ApiKeyRow = {
   id: string;
-  name: string;
-  status: string;
+  keyPrefix: string | null;
   createdAt: string;
 };
 
-export async function listDocuments(token: string): Promise<DocumentSummary[]> {
-  const res = await fetch(`${baseUrl}/api/v1/scans`, {
+export async function listApiKeys(token: string): Promise<ApiKeyRow[]> {
+  const res = await fetch(`${baseUrl}/auth/api-keys`, {
     headers: headers(token),
   });
-  const data = await res.json().catch(() => null);
+  const data = await res.json().catch(() => []);
   if (!res.ok) {
-    throw new Error(
-      typeof data?.message === 'string' ? data.message : res.statusText,
-    );
+    throw new Error(errorFromBody(data, res.statusText));
   }
-  return data as DocumentSummary[];
+  return data as ApiKeyRow[];
 }
 
-export async function createDocument(
+export async function createApiKey(token: string): Promise<{
+  id: string;
+  apiKey: string;
+  keyPrefix: string;
+  createdAt: string;
+}> {
+  const res = await fetch(`${baseUrl}/auth/api-keys`, {
+    method: 'POST',
+    headers: headers(token),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(errorFromBody(data, res.statusText));
+  }
+  return data as {
+    id: string;
+    apiKey: string;
+    keyPrefix: string;
+    createdAt: string;
+  };
+}
+
+export async function revokeApiKey(
   token: string,
-  body: { name: string; content: string },
-): Promise<{ documentId: string; status: string }> {
+  keyId: string,
+): Promise<void> {
+  const res = await fetch(
+    `${baseUrl}/auth/api-keys/${encodeURIComponent(keyId)}`,
+    {
+      method: 'DELETE',
+      headers: headers(token),
+    },
+  );
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(errorFromBody(data, res.statusText));
+  }
+}
+
+export async function createScan(
+  token: string,
+  body: { document_name: string; content: string },
+): Promise<{ documentId: string; id: string; status: string }> {
   const res = await fetch(`${baseUrl}/api/v1/scans`, {
     method: 'POST',
     headers: headers(token),
@@ -55,28 +113,47 @@ export async function createDocument(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(typeof data.message === 'string' ? data.message : res.statusText);
+    throw new Error(errorFromBody(data, res.statusText));
   }
-  return data as { documentId: string; status: string };
+  return data as { documentId: string; id: string; status: string };
 }
 
-export type DocumentDetail = {
+export type ScanSummary = {
   id: string;
   name: string;
   status: string;
+  riskLevel: string;
+  createdAt: string;
+  findingsCount: number;
+};
+
+export async function listScans(token: string): Promise<ScanSummary[]> {
+  const res = await fetch(`${baseUrl}/api/v1/scans`, {
+    headers: headers(token),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error(errorFromBody(data, res.statusText));
+  }
+  return data as ScanSummary[];
+}
+
+export type ScanDetail = {
+  id: string;
+  name: string;
+  content: string;
+  status: string;
+  riskLevel: string;
   findings?: Array<{ type: string; value: string; position: number }>;
 };
 
-export async function getDocument(
-  token: string,
-  id: string,
-): Promise<DocumentDetail> {
+export async function getScan(token: string, id: string): Promise<ScanDetail> {
   const res = await fetch(`${baseUrl}/api/v1/scans/${encodeURIComponent(id)}`, {
     headers: headers(token),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(typeof data.message === 'string' ? data.message : res.statusText);
+    throw new Error(errorFromBody(data, res.statusText));
   }
-  return data as DocumentDetail;
+  return data as ScanDetail;
 }
