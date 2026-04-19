@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-scanshield}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  backend:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      NODE_ENV: development
+      PORT: "3000"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_USER: ${POSTGRES_USER:-postgres}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DATABASE_NAME: ${POSTGRES_DB:-scanshield}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-scanshield}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    command: >
+      sh -c "corepack enable && corepack prepare pnpm@9.15.4 --activate &&
+      pnpm install && pnpm --filter backend dev"
+
+  frontend:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      NODE_ENV: development
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    command: >
+      sh -c "corepack enable && corepack prepare pnpm@9.15.4 --activate &&
+      pnpm install && pnpm --filter frontend dev"
+
+networks:
+  default:
+    name: scanshield
+
+volumes:
+  postgres_data:
