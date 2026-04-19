@@ -1,6 +1,8 @@
 # ScanShield
 
-PII document scanner: upload plain text (JSON or **multipart file**), queue a **BullMQ** job, run regex detection (email, US phone, SSN, credit card), store **findings** (value, type, character offset) and **risk level**, track status end-to-end (`queued` → `processing` → **`completed`** or `failed`).
+PII document scanner: upload plain text (JSON or **multipart file**), queue a **BullMQ** job, run regex detection (email, US phone, SSN, credit card), and store **findings** (value, type, character offset) plus **risk level**.
+
+It tracks status end-to-end (`queued` → `processing` → **`completed`** or `failed`).
 
 ## Stack
 
@@ -13,11 +15,11 @@ PII document scanner: upload plain text (JSON or **multipart file**), queue a **
 docker compose up
 ```
 
-- **API:** http://localhost:3000  
-- **UI:** http://localhost:5173 (proxies `/api`, `/auth`, `/admin` to the backend — **`/api/v1/scans`** is served under `/api/...`)  
+- **API:** http://localhost:3000 — all REST routes (e.g. `/auth/...`, `/api/v1/scans`) live here.  
+- **UI:** http://localhost:5173 — in dev, Vite proxies **`/api/v1`**, **`/auth`**, and **`/admin`** to the backend (see [`apps/frontend/vite.config.ts`](apps/frontend/vite.config.ts)). A broad **`/api`** proxy would incorrectly match the SPA path **`/api-keys`**, so only **`/api/v1`** is proxied for scans.  
 - **Bull Board:** http://localhost:5173/admin/queues (or http://localhost:3000/admin/queues)
 
-Create an account under **Register**, then use **Documents** and **API keys**. The UI uses a **JWT** after login; **API keys** (`sk_…`) are for automation without the browser.
+Create an account under **Register**, then use **Documents** and **API keys**. The **“API keys”** screen is the React route **`/api-keys`** (e.g. `http://localhost:5173/api-keys`). That is **not** the same as the backend routes **`/auth/api-keys`** used to create or list keys. After login the UI uses a **JWT**; **`sk_…`** keys are for automation without the browser.
 
 Optional: protect Bull Board with HTTP Basic by setting **`BULL_BOARD_USER`** and **`BULL_BOARD_PASSWORD`** in the backend environment. If unset, `/admin/queues` stays open (dev convenience).
 
@@ -53,7 +55,7 @@ pnpm dev:frontend
 
 Backend migrations run automatically on start. To run migrations manually: `pnpm --filter backend migration:run`.
 
-## API (matches take-home spec)
+## HTTP API
 
 Auth:
 
@@ -98,4 +100,4 @@ When `status` is `completed`, the response includes `findings` (each with `type`
 - Refresh-token flow, API key rotation metadata, structured logging, e2e tests  
 - Stricter file-type hints on multipart upload; optional line-number reporting for findings  
 
-If we’d hit a 2-hour limit mid-feature, we’d ship a working backend + queue first and stub or simplify the UI, and list the remaining UI work here.
+Under a **2-hour** limit, we’d ship a working backend + queue first, stub or simplify the UI if needed, and list any remaining UI work here.

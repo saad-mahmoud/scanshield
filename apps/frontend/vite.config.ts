@@ -11,7 +11,8 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      '/api': { target: proxyTarget, changeOrigin: true },
+      // Use /api/v1 only — a broad `/api` prefix also matches the SPA route `/api-keys` and breaks direct loads.
+      '/api/v1': { target: proxyTarget, changeOrigin: true },
       '/auth': { target: proxyTarget, changeOrigin: true },
       '/admin': { target: proxyTarget, changeOrigin: true },
     },
