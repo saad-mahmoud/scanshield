@@ -4,6 +4,8 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev:backend": "pnpm --filter backend dev",
-    "dev:frontend": "pnpm --filter frontend dev"
+    "dev:frontend": "pnpm --filter frontend dev",
+    "seed": "node scripts/seed-all.mjs",
+    "seed:documents": "pnpm --filter frontend seed"
   }
 }
