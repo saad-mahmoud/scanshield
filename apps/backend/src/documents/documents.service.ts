@@ -17,11 +17,15 @@ export class DocumentsService {
     private readonly documentQueue: Queue,
   ) {}
 
-  async create(dto: CreateDocumentDto): Promise<{ documentId: string; status: WorkflowStatus }> {
+  async create(
+    dto: CreateDocumentDto,
+    userId: string,
+  ): Promise<{ documentId: string; status: WorkflowStatus }> {
     const doc = this.documents.create({
       name: dto.name,
       content: dto.content,
       status: WorkflowStatus.Queued,
+      user: { id: userId },
     });
     await this.documents.save(doc);
 

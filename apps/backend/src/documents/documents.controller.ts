@@ -1,4 +1,13 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import type { Request } from 'express';
 import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
@@ -10,7 +19,7 @@ export class DocumentsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: CreateDocumentDto) {
-    return this.documentsService.create(dto);
+  create(@Body() dto: CreateDocumentDto, @Req() req: Request) {
+    return this.documentsService.create(dto, req.user!.id);
   }
 }

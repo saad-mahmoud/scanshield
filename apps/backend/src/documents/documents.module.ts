@@ -11,5 +11,6 @@ import { DocumentsService } from './documents.service';
   imports: [TypeOrmModule.forFeature([Document, Finding]), QueueModule, AuthModule],
   controllers: [DocumentsController],
   providers: [DocumentsService],
+  exports: [DocumentsService],
 })
 export class DocumentsModule {}
