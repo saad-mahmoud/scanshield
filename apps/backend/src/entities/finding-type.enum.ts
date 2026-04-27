@@ -3,4 +3,5 @@ export enum FindingType {
   Phone = 'phone',
   Ssn = 'ssn',
   CreditCard = 'credit_card',
+  Iban = 'iban',
 }
