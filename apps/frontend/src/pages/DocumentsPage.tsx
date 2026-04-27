@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createScan, listScans, type ScanSummary } from '../api';
+import { createScan, deleteScan, listScans, type ScanSummary } from '../api';
 import { useAuth } from '../auth-context';
 import { riskLevelColor } from '../riskLevelColor';
 
@@ -16,6 +16,7 @@ export function DocumentsPage() {
   const [scans, setScans] = useState<ScanSummary[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<ScanStatusFilter | ''>('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadScans = useCallback(async () => {
     if (!token) return;
@@ -59,6 +60,23 @@ export function DocumentsPage() {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function onDelete(scan: ScanSummary) {
+    if (!token || deletingId) return;
+    const confirmed = window.confirm(`Delete "${scan.name}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    setDeletingId(scan.id);
+    setError(null);
+    try {
+      await deleteScan(token, scan.id);
+      await loadScans();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -164,6 +182,9 @@ export function DocumentsPage() {
                 <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '8px 0' }}>
                   Uploaded
                 </th>
+                <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '8px 0' }}>
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -183,6 +204,15 @@ export function DocumentsPage() {
                   </td>
                   <td style={{ padding: '8px 0', verticalAlign: 'top', color: '#555' }}>
                     {new Date(s.createdAt).toLocaleString()}
+                  </td>
+                  <td style={{ padding: '8px 0', verticalAlign: 'top' }}>
+                    <button
+                      type="button"
+                      onClick={() => void onDelete(s)}
+                      disabled={deletingId !== null}
+                    >
+                      {deletingId === s.id ? 'Deleting…' : 'Delete'}
+                    </button>
                   </td>
                 </tr>
               ))}
