@@ -127,8 +127,12 @@ export type ScanSummary = {
   findingsCount: number;
 };
 
-export async function listScans(token: string): Promise<ScanSummary[]> {
-  const res = await fetch(`${baseUrl}/api/v1/scans`, {
+export async function listScans(
+  token: string,
+  status?: 'queued' | 'processing' | 'completed' | 'failed',
+): Promise<ScanSummary[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  const res = await fetch(`${baseUrl}/api/v1/scans${query}`, {
     headers: headers(token),
   });
   const data = await res.json().catch(() => null);
