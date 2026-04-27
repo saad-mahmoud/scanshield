@@ -3,10 +3,11 @@ import { Link, useParams } from 'react-router-dom';
 import { getScan, type ScanDetail } from '../api';
 import { useAuth } from '../auth-context';
 import { riskLevelColor } from '../riskLevelColor';
+import { maskByFindingType } from '../sensitiveDisplay';
 
 function highlightContent(
   text: string,
-  findings: Array<{ value: string; position: number }>,
+  findings: Array<{ type: string; value: string; position: number }>,
 ): ReactNode[] {
   if (findings.length === 0) {
     return [text];
@@ -25,7 +26,7 @@ function highlightContent(
         key={`${start}-${i}`}
         style={{ backgroundColor: '#fff3cd', padding: '0 2px' }}
       >
-        {text.slice(start, end)}
+        {maskByFindingType(f.type, f.value)}
       </mark>,
     );
     cursor = end;
@@ -198,7 +199,7 @@ export function DocumentDetailPage() {
                         verticalAlign: 'top',
                       }}
                     >
-                      {f.value}
+                      {maskByFindingType(f.type, f.value)}
                     </td>
                     <td style={{ padding: '6px 0', verticalAlign: 'top' }}>
                       {f.position}
