@@ -5,6 +5,8 @@ import { createScan, listScans, type ScanSummary } from '../api';
 import { useAuth } from '../auth-context';
 import { riskLevelColor } from '../riskLevelColor';
 
+type ScanStatusFilter = 'queued' | 'processing' | 'completed' | 'failed';
+
 export function DocumentsPage() {
   const { token, logout } = useAuth();
   const navigate = useNavigate();
@@ -13,20 +15,24 @@ export function DocumentsPage() {
   const [uploading, setUploading] = useState(false);
   const [scans, setScans] = useState<ScanSummary[]>([]);
   const [listLoading, setListLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<ScanStatusFilter | ''>('');
 
   const loadScans = useCallback(async () => {
     if (!token) return;
     setListLoading(true);
     setError(null);
     try {
-      const rows = await listScans(token);
-      setScans(rows);
+      const rows = await listScans(token, statusFilter || undefined);
+      const nextRows = statusFilter
+        ? rows.filter((row) => row.status === statusFilter)
+        : rows;
+      setScans(nextRows);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load scans');
     } finally {
       setListLoading(false);
     }
-  }, [token]);
+  }, [token, statusFilter]);
 
   useEffect(() => {
     void loadScans();
@@ -104,7 +110,31 @@ export function DocumentsPage() {
       </section>
 
       <section style={{ marginTop: 40 }}>
-        <h2 style={{ marginTop: 0, fontSize: 18 }}>Your documents</h2>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            flexWrap: 'wrap',
+            marginBottom: 8,
+          }}
+        >
+          <h2 style={{ marginTop: 0, marginBottom: 0, fontSize: 18 }}>Your documents</h2>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+            <span>Status</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as ScanStatusFilter | '')}
+            >
+              <option value="">All</option>
+              <option value="queued">Queued</option>
+              <option value="processing">Processing</option>
+              <option value="completed">Completed</option>
+              <option value="failed">Failed</option>
+            </select>
+          </label>
+        </div>
         {listLoading ? (
           <p style={{ color: '#666', fontSize: 14 }}>Loading…</p>
         ) : scans.length === 0 ? (

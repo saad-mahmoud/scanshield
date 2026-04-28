@@ -20,7 +20,7 @@ export class ScansService {
     private readonly documentQueue: Queue,
   ) {}
 
-  async list(userId: string): Promise<
+  async list(userId: string, status?: WorkflowStatus): Promise<
     Array<{
       id: string;
       name: string;
@@ -30,10 +30,16 @@ export class ScansService {
       findingsCount: number;
     }>
   > {
-    const rows = await this.documents.find({
-      where: { user: { id: userId } },
-      order: { createdAt: 'DESC' },
-    });
+    const qb = this.documents
+      .createQueryBuilder('document')
+      .where('document.userId = :userId', { userId })
+      .orderBy('document.createdAt', 'DESC');
+
+    if (status) {
+      qb.andWhere('document.status = :status', { status });
+    }
+
+    const rows = await qb.getMany();
 
     const out: Array<{
       id: string;

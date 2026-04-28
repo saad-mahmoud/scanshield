@@ -6,8 +6,10 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -18,6 +20,7 @@ import { memoryStorage } from 'multer';
 import { basename } from 'node:path';
 import type { Request } from 'express';
 import { ScanAuthGuard } from '../auth/scan-auth.guard';
+import { WorkflowStatus } from '../entities/workflow-status.enum';
 import { CreateScanDto, parseCreateScanJsonBody } from './dto/create-scan.dto';
 import { ScansService } from './scans.service';
 
@@ -67,8 +70,12 @@ export class ScansController {
   }
 
   @Get()
-  list(@Req() req: Request) {
-    return this.scansService.list(req.user!.id);
+  list(
+    @Req() req: Request,
+    @Query('status', new ParseEnumPipe(WorkflowStatus, { optional: true }))
+    status?: WorkflowStatus,
+  ) {
+    return this.scansService.list(req.user!.id, status);
   }
 
   @Get(':id')
