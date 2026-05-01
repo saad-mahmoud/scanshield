@@ -135,4 +135,16 @@ export class ScansService {
       })),
     };
   }
+
+  async deleteScan(id: string, userId: string): Promise<void> {
+    const doc = await this.documents.findOne({
+      where: { id, user: { id: userId } },
+    });
+
+    if (!doc) {
+      throw new NotFoundException();
+    }
+
+    await this.documents.remove(doc);
+  }
 }

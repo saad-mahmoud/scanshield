@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -81,5 +82,11 @@ export class ScansController {
   @Get(':id')
   getOne(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request) {
     return this.scansService.getScan(id, req.user!.id);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request) {
+    await this.scansService.deleteScan(id, req.user!.id);
   }
 }

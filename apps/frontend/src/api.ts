@@ -142,6 +142,17 @@ export async function listScans(
   return data as ScanSummary[];
 }
 
+export async function deleteScan(token: string, id: string): Promise<void> {
+  const res = await fetch(`${baseUrl}/api/v1/scans/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: headers(token),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(errorFromBody(data, res.statusText));
+  }
+}
+
 export type ScanDetail = {
   id: string;
   name: string;
