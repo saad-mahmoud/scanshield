@@ -20,11 +20,15 @@ const SSN = /\b\d{3}-\d{2}-\d{4}\b/g;
 /** 16 digits with optional spaces/dashes between groups (basic, not Luhn-validated) */
 const CREDIT_CARD = /\b(?:\d{4}[-\s]?){3}\d{4}\b/g;
 
+/** Basic IBAN format: 2-letter country, 2 check digits, then 11-30 alphanumeric chars */
+const IBAN = /\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/g;
+
 const PATTERNS: ReadonlyArray<{ type: FindingType; regex: RegExp }> = [
   { type: FindingType.Email, regex: EMAIL },
   { type: FindingType.Phone, regex: US_PHONE },
   { type: FindingType.Ssn, regex: SSN },
   { type: FindingType.CreditCard, regex: CREDIT_CARD },
+  { type: FindingType.Iban, regex: IBAN },
 ];
 
 /**
@@ -52,6 +56,9 @@ export function computeRiskLevel(matches: ScanMatch[]): RiskLevel {
   const types = new Set(matches.map((m) => m.type));
   if (types.has(FindingType.Ssn) || types.has(FindingType.CreditCard)) {
     return RiskLevel.Critical;
+  }
+  if (types.size === 1 && types.has(FindingType.Iban)) {
+    return RiskLevel.High;
   }
   if (types.size >= 2) {
     return RiskLevel.High;
